@@ -1,0 +1,10 @@
+fastapi
+tortoise-orm
+starlette
+python-dotenv
+uvicorn
+pillow
+pyjwt
+sqlite3
+pydantic
+fastapi-mail
