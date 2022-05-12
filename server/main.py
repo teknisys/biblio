@@ -223,6 +223,10 @@ async def update_product(id: int, product: product_pydanticIn, user: user_pydant
 
 @app.post("/uploadfile/product/{id}", status_code=status.HTTP_201_CREATED)
 async def create_upload_file(id: int, file: UploadFile = File(...), user: user_pydantic = Depends(get_current_user)):
+    product = await Product.get(id=id)
+    business = await product.business
+    owner = await business.owner
+
     FILEPATH = "./static/images/"
     filename = file.filename
     extension = filename.split(".")[1]
@@ -239,10 +243,6 @@ async def create_upload_file(id: int, file: UploadFile = File(...), user: user_p
     img = Image.open(generated_name)
     img = img.resize(size=(200, 200))
     img.save(generated_name)
-
-    product = await Product.get(id=id)
-    business = await product.business
-    owner = await business.owner
 
     if owner == user:
         product.cover_image = token_name
