@@ -7,3 +7,4 @@ pillow
 pyjwt
 pydantic
 fastapi-mail
+passlib
