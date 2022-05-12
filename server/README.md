@@ -13,6 +13,10 @@ pip install -r requirements.txt
 ```
 uvicorn main:app --reload
 ```
+To fill in fake data into the DB, first run the app and then:
+```
+python3 autoPopulateDB.py
+```
 
 # Docs
 
