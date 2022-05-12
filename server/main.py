@@ -148,8 +148,6 @@ async def add_new_product(product: product_pydanticIn, user: user_pydantic = Dep
             detail="Email verification required",
         )
 
-    print(product, type(product))
-
     product = product.dict(exclude_unset=True)
 
     product_obj = await Product.create(**product, business=user)

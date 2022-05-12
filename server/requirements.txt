@@ -6,5 +6,4 @@ uvicorn
 pillow
 pyjwt
 pydantic
-fastapi-mail
 passlib
