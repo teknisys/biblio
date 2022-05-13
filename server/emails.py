@@ -1,7 +1,5 @@
-import pathlib
 from dotenv import dotenv_values
 from pydantic import BaseModel, EmailStr
-from typing import List
 import jwt
 from models import User
 
