@@ -40,17 +40,24 @@ from fastapi.templating import Jinja2Templates
 
 from fastapi.responses import HTMLResponse
 
+from slowapi.errors import RateLimitExceeded
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+
 config_credentials = dict(dotenv_values(".env"))
 
-
+limiter = Limiter(key_func=get_remote_address)
 app = FastAPI()
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 
 @app.get("/")
-def api_check():
+@limiter.limit("10/minute")
+def api_check(request: Request):
     return {"status": "success", "data": "API is up and running!"}
 
 
@@ -58,7 +65,8 @@ oath2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 # password helper functions
 @app.post("/token")
-async def generate_token(request_form: OAuth2PasswordRequestForm = Depends()):
+@limiter.limit("10/minute")
+async def generate_token(request: Request, request_form: OAuth2PasswordRequestForm = Depends()):
     token = await token_generator(request_form.username, request_form.password)
     return {"access_token": token, "token_type": "bearer"}
 
@@ -80,7 +88,8 @@ async def create_business(
 
 
 @app.post("/registration")
-async def user_registration(user: user_pydanticIn):
+@limiter.limit("10/minute")
+async def user_registration(user: user_pydanticIn, request: Request):
     user_info = user.dict(exclude_unset=True)
     user_info["password"] = get_password_hash(user_info["password"])
     user_obj = await User.create(**user_info)
@@ -99,6 +108,7 @@ templates = Jinja2Templates(directory="templates")
 
 
 @app.get("/verification", response_class=HTMLResponse)
+@limiter.limit("10/minute")
 async def email_verification(request: Request, token: str):
     user = await verify_token(token)
     if user and not user.is_verified:
@@ -112,7 +122,7 @@ async def email_verification(request: Request, token: str):
     )
 
 
-async def get_current_user(token: str = Depends(oath2_scheme)):
+async def get_current_user(request: Request, token: str = Depends(oath2_scheme)):
     try:
         payload = jwt.decode(token, config_credentials["SECRET"], algorithms=["HS256"])
         user = await User.get(id=payload.get("id"))
@@ -127,7 +137,8 @@ async def get_current_user(token: str = Depends(oath2_scheme)):
 
 
 @app.post("/user/me")
-async def user_login(user: user_pydantic = Depends(get_current_user)):
+@limiter.limit("10/minute")
+async def user_login(request: Request, user: user_pydantic = Depends(get_current_user)):
     return {
         "status": "success",
         "data": {
@@ -140,7 +151,10 @@ async def user_login(user: user_pydantic = Depends(get_current_user)):
 
 
 @app.post("/products", status_code=status.HTTP_201_CREATED)
-async def add_new_product(product: product_pydanticIn, user: user_pydantic = Depends(get_current_user)):
+@limiter.limit("10/minute")
+async def add_new_product(
+    request: Request, product: product_pydanticIn, user: user_pydantic = Depends(get_current_user)
+):
     # only email verified users can create products
     if not user.is_verified:
         raise HTTPException(
@@ -156,13 +170,14 @@ async def add_new_product(product: product_pydanticIn, user: user_pydantic = Dep
 
 
 @app.get("/products")
-async def get_products():
+@limiter.limit("10/minute")
+async def get_products(request: Request):
     response = await product_pydanticIn.from_queryset(Product.all())
     return {"status": "success", "data": response}
 
 
 @app.get("/products/{id}")
-async def specific_product(id: int):
+async def specific_product(id: int, request: Request):
     response = await product_pydantic.from_queryset_single(Product.get(id=id))
     return {
         "status": "success",
@@ -173,7 +188,8 @@ async def specific_product(id: int):
 
 
 @app.get("/filter/{genre}")
-async def filter(genre: str):
+@limiter.limit("10/minute")
+async def filter(genre: str, request: Request):
     response = await product_pydantic.from_queryset(Product.filter(genre=genre))
     if len(response) == 0:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"No books found under genre {genre}")
@@ -181,7 +197,8 @@ async def filter(genre: str):
 
 
 @app.delete("/products/{id}")
-async def delete_product(id: int, user: user_pydantic = Depends(get_current_user)):
+@limiter.limit("10/minute")
+async def delete_product(id: int, request: Request, user: user_pydantic = Depends(get_current_user)):
     product = await Product.get(id=id)
     business = await product.business
     owner = await business.owner
@@ -206,7 +223,10 @@ async def delete_product(id: int, user: user_pydantic = Depends(get_current_user
 
 
 @app.patch("/products/{id}")
-async def update_product(id: int, product: product_pydanticIn, user: user_pydantic = Depends(get_current_user)):
+@limiter.limit("10/minute")
+async def update_product(
+    id: int, request: Request, product: product_pydanticIn, user: user_pydantic = Depends(get_current_user)
+):
     # only email verified users can delete
     if not user.is_verified:
         raise HTTPException(
@@ -220,7 +240,10 @@ async def update_product(id: int, product: product_pydanticIn, user: user_pydant
 
 
 @app.post("/uploadfile/product/{id}", status_code=status.HTTP_201_CREATED)
-async def create_upload_file(id: int, file: UploadFile = File(...), user: user_pydantic = Depends(get_current_user)):
+@limiter.limit("10/minute")
+async def create_upload_file(
+    id: int, request: Request, file: UploadFile = File(...), user: user_pydantic = Depends(get_current_user)
+):
     product = await Product.get(id=id)
     business = await product.business
     owner = await business.owner
@@ -258,7 +281,10 @@ async def create_upload_file(id: int, file: UploadFile = File(...), user: user_p
 
 
 @app.post("/checkout")
-async def checkout(orders: List[product_pydanticOut], user: user_pydantic = Depends(get_current_user)):
+@limiter.limit("10/minute")
+async def checkout(
+    request: Request, orders: List[product_pydanticOut], user: user_pydantic = Depends(get_current_user)
+):
     total_cost = 0
     for i in orders:
         i = dict(i)
