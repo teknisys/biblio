@@ -9,3 +9,4 @@ pydantic[email]
 passlib
 python-multipart
 jinja2
+pytest
