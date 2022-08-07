@@ -5,5 +5,7 @@ python-dotenv
 uvicorn
 pillow
 pyjwt
-pydantic
+pydantic[email]
 passlib
+python-multipart
+jinja2
