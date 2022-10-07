@@ -12,23 +12,14 @@ class BiblioAPI():
         else:
             return False
 
-    def register_user(self,username:str ,email:str ,password: str) -> bool:
-        data = {
-        "username": username,
-        "email": email,
-        "password": password
-        }
+    def register_user(self,data: dict) -> bool:
         code = requests.post(self.base+"/registration", json.dumps(data))
         if code == 200:
             return True
         else:
             return False
 
-    def authenticate(self,username: str,password: str) -> bool:
-        data={
-        "username": username,
-        "password": password
-        }
+    def authenticate(self,data: dict) -> bool:
         auth_data=requests.post(self.base+"/token", json.dumps(data))
         v_code=requests.get(self.base+"/verification", auth_data)
         if v_code == 200:
