@@ -1,3 +1,4 @@
+from tkinter import E
 import requests
 import json
 class BiblioAPI():
@@ -6,10 +7,13 @@ class BiblioAPI():
         self.auth_data = None
     
     def status(self) -> bool:
-        code = requests.get(self.base)
-        if code == 200:
-            return True
-        else:
+        try:
+            code = requests.get(self.base)
+            if code == 200:
+                return True
+            else:
+                return False
+        except:
             return False
 
     def register_user(self,data: dict) -> bool:

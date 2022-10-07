@@ -44,14 +44,11 @@ def home():
     pass
 
 # main program starts
-lor = welcomeMessage()
-if lor == "Register":
-    c.clear()
-    register()
-    c.clear()
-else:
-    c.clear()
-    login()
-    c.clear()
+if online:
+    welcomeMessage()
+    if action == "Register":
+        register()
+    else:
+        login()
 
 
