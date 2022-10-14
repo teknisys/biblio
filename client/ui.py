@@ -9,7 +9,8 @@ import os
 c = Console()
 api = BiblioAPI()
 # Server Status Check
-online = api.status()
+# online = api.status()
+online  = True # use for testing
 
 # Helpers
 def saveCredentials(username,password):
