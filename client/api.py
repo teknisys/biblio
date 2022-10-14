@@ -99,3 +99,5 @@ class BiblioAPI():
             return True
         else:
             return False
+    
+ 
