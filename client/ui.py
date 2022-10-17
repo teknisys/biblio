@@ -1,7 +1,9 @@
+from msilib.schema import tables
 from rich import print
 from rich.panel import Panel
 from rich.prompt import Prompt,Confirm
 from rich.console import Console
+from rich.table import Table
 from api import BiblioAPI
 import json
 import os
@@ -78,7 +80,7 @@ def home():
     else:
         exit(0)
 def discover():
-    return
+    return []
     c.clear()
     print(Panel.fit(title="Discover", border_style="red"))
     results = api.discover() #TODO: implement 
@@ -91,10 +93,54 @@ def search():
     results = api.get_products_from_category(category)
     return results
 
+def createEntry():
+    c.clear()
+    print(Panel.fit(title="Add Item", border_style="red"))
+    name = Prompt.ask("Name")
+    price = Prompt.ask("Price")
+    qty = Prompt.ask("Quantity")
+    date = Prompt.ask("Date Published")
+    genre = Prompt.ask("Genre")
+    cov_image = Prompt.ask("Cover Image")
+    return api.create_product({"name": name, "price": price, "qty": qty, "date": date, "genre": genre, "cov_image": cov_image})
 def displayResults(results):
-    print(results)
+    table = Table(
+        title="Results",
+        show_header=True,
+        header_style="bold magenta",
+        show_lines=True,
+
+    )
+    table.add_column("ID", style="dim", width=12)
+    table.add_column("Name", style="dim", width=20)
+    table.add_column("Price", justify="right")
+    table.add_column("Quantity", justify="right")
+    table.add_column("Date Published", justify="right")
+    table.add_column("Genre", justify="right")
+    table.add_column("Cover Image", justify="right")
+    i = 0
+    for result in results:
+        table.add_row(
+            i,
+            result["name"],
+            str(result["price"]),
+            str(result["qty"]),
+            result["date"],
+            result["genre"],
+            result["cov_image"],
+        )
+        i+=1
+    c.print(table)
+    action = Prompt.ask("id")
+    record = results[int(action)]
+    displayRecord(record)
+    
     #TODO: show results
     #TODO: show menu
+def displayRecord(record):
+    pass
+
+
 
 # main program starts
 if not online:
