@@ -93,9 +93,9 @@ def search():
     results = api.get_products_from_category(category)
     return results
 
-def createEntry():
+def createProduct():
     c.clear()
-    print(Panel.fit(title="Add Item", border_style="red"))
+    print(Panel.fit(title="Add Product", border_style="red"))
     name = Prompt.ask("Name")
     price = Prompt.ask("Price")
     qty = Prompt.ask("Quantity")
@@ -103,6 +103,36 @@ def createEntry():
     genre = Prompt.ask("Genre")
     cov_image = Prompt.ask("Cover Image")
     return api.create_product({"name": name, "price": price, "qty": qty, "date": date, "genre": genre, "cov_image": cov_image})
+
+def deleteProduct():
+    c.clear()
+    print(Panel.fit(title="Delete Product", border_style="red"))
+    id = Prompt.ask("ID")
+    confirm = Confirm.ask("Confirm Delete")
+    if confirm:
+        return api.delete_product(id)
+    return None
+
+def displayProductData(product_id: str = None):
+    if product_id is None:
+        product_id = Prompt.ask("Product ID")
+    product = api.get_product(product_id)
+    #TODO: create display layout
+    return
+    
+def updateProduct(product_id: str = None):
+    if product_id is None:
+        product_id = Prompt.ask("Product ID")
+    product = api.get_product(product_id)
+    name = Prompt.ask("Name", default=product["name"])
+    price = Prompt.ask("Price", default=product["price"])
+    qty = Prompt.ask("Quantity", default=product["qty"])
+    date = Prompt.ask("Date Published", default=product["date"])
+    genre = Prompt.ask("Genre", default=product["genre"])
+    cov_image = Prompt.ask("Cover Image", default=product["cov_image"])
+    return api.update_product(product_id, {"name": name, "price": price, "qty": qty, "date": date, "genre": genre, "cov_image": cov_image})
+
+
 def displayResults(results):
     table = Table(
         title="Results",

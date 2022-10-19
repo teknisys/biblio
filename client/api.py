@@ -59,10 +59,11 @@ class BiblioAPI():
 
     def get_product(self,product_id: str) -> dict:
         code = requests.get(self.base+f'/product/{product_id}')
+        data = code.json()
         if code == 200:
-            return True
+            return data
         else:
-            return False
+            return None
     
     def create_product(self,product_data: dict) -> bool:
 
