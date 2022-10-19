@@ -1,4 +1,3 @@
-from msilib.schema import tables
 from rich import print
 from rich.panel import Panel
 from rich.prompt import Prompt,Confirm
@@ -13,6 +12,7 @@ api = BiblioAPI()
 # Server Status Check
 # online = api.status()
 online  = True # use for testing
+test_mode = False # test mode enabled
 
 # Helpers
 def saveCredentials(username,password):
@@ -36,9 +36,6 @@ def welcomeMessage():
     print(Panel.fit("The all in one bookstore for all your reading needs.", title="Welcome to Biblio", border_style="red",subtitle_align="center"))
     action = Prompt.ask("", choices=["Login", "Register"], default="Register")
     return action
-
-
-
 
 # Register
 def register():
@@ -79,6 +76,7 @@ def home():
         displayResults(discover())
     else:
         exit(0)
+
 def discover():
     return []
     c.clear()
@@ -132,7 +130,6 @@ def updateProduct(product_id: str = None):
     cov_image = Prompt.ask("Cover Image", default=product["cov_image"])
     return api.update_product(product_id, {"name": name, "price": price, "qty": qty, "date": date, "genre": genre, "cov_image": cov_image})
 
-
 def displayResults(results):
     table = Table(
         title="Results",
@@ -170,17 +167,17 @@ def displayResults(results):
 def displayRecord(record):
     pass
 
-
-
 # main program starts
-if not online:
-    print(Panel.fit("Please start server and try again.", title="Server Offline", border_style="red",subtitle_align="center"))
-    exit(1)
-action = welcomeMessage()
-if action == "Register":
-    register()
+if test_mode:
+        if not online:
+            print(Panel.fit("Please start server and try again.", title="Server Offline", border_style="red",subtitle_align="center"))
+            exit(1)
+        action = welcomeMessage()
+        if action == "Register":
+            register()
+        else:
+            login()
+        while True:
+            home()
 else:
-    login()
-
-while True:
-    home()
+    pass #TODO: use this to test induvidual screens
