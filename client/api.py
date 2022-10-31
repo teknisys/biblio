@@ -58,13 +58,20 @@ class BiblioAPI():
             return False
 
     def get_product(self,product_id: str) -> dict:
-        code = requests.get(self.base+f'/product/{product_id}')
-        data = code.json()
-        if code == 200:
-            return data
+        res = requests.get(self.base+f'/products/{product_id}')
+        data = res.json()
+        if res.status_code == 200:
+            return data["data"]
         else:
             return None
     
+    def discover(self):
+        res = requests.get(self.base+'/products/')
+        if res.status_code == 200:
+            return res.json()["data"]
+        else:
+            return False
+
     def create_product(self,product_data: dict) -> bool:
 
         '''
@@ -78,7 +85,7 @@ class BiblioAPI():
         "quantity": proqty
         }
         '''
-        code = requests.post(self.base+'/product',json.dumps(product_data))
+        code = requests.post(self.base+'/product/',json.dumps(product_data))
         if code == 201:
             return True
         else:

@@ -6,6 +6,7 @@ from rich.layout import Layout
 from rich.console import Console
 from rich.table import Table
 from api import BiblioAPI
+import time
 import json
 import os
 # console
@@ -104,10 +105,13 @@ def home():
         exit(0)
 
 def discover():
-    return []
     c.clear()
     print(Panel.fit(title="Discover", border_style="red"))
     results = api.discover() #TODO: implement 
+    if results == False:
+        print("[red]Failed to retrieve content[/red]")
+        time.sleep(3)
+        return False
     return results
 
 def search():
@@ -126,7 +130,7 @@ def createProduct():
     qty = Prompt.ask("Quantity")
     date = Prompt.ask("Date Published")
     genre = Prompt.ask("Genre")
-    cov_image = Prompt.ask("Cover Image")
+    cov_image = "cover.jpg"
     return api.create_product({"name": name, "price": price, "qty": qty, "date": date, "genre": genre, "cov_image": cov_image})
 
 def deleteProduct():
@@ -142,6 +146,11 @@ def displayProductData(product_id: str = None):
     if product_id is None:
         product_id = Prompt.ask("Product ID")
     product = api.get_product(product_id)
+    if product is None:
+        print("[red]Product not found[/red]")
+        time.sleep(3)
+        return False
+
     #TODO: create display layout
     displayRecord(product)
     
