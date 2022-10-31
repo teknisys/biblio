@@ -85,11 +85,11 @@ class BiblioAPI():
             return False
 
     def get_products_from_category(self,category: str) -> list:
-        code = requests.get(self.base+f'/filter/{category}')
-        if code == 200:
-            return True
+        res = requests.get(self.base+f'/filter/{category}')
+        if res.status_code == 200:
+            return res.json()
         else:
-            return False
+            return None
     
     def upload_file(self,file) -> bool:
         files = {

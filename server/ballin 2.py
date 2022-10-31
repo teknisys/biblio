@@ -43,7 +43,6 @@ def proget():
 def filter():
     filter1 = requests.get(f'http://localhost:8000/filter/fiction/')
     filter2 = requests.get(f'http://localhost:8000/filter/Gaming/')
-
     return [filter1.status_code, filter2.status_code] == [200, 404]
 
 
