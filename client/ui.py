@@ -7,6 +7,7 @@ from rich.layout import Layout
 from rich.console import Console
 from rich.table import Table
 from api import BiblioAPI
+import time
 import json
 import os
 
@@ -122,10 +123,13 @@ def home():
 
 
 def discover():
-    return []
     c.clear()
     print(Panel.fit(title="Discover", border_style="red"))
     results = api.discover()  # TODO: implement
+    if results == False:
+        print("[red]Failed to retrieve content[/red]")
+        time.sleep(3)
+        return False
     return results
 
 
