@@ -1,62 +1,76 @@
+import time
 from dateutil import parser
 from rich import print
 from rich.panel import Panel
-from rich.prompt import Prompt,Confirm
+from rich.prompt import Prompt, Confirm
 from rich.layout import Layout
 from rich.console import Console
 from rich.table import Table
 from api import BiblioAPI
 import json
 import os
+
 # console
 c = Console()
 api = BiblioAPI()
 # Server Status Check
-# online = api.status()
-online  = True # use for testing
-test_mode = False # test mode enabled
+online = api.status()
+# online  = True # use for testing
+test_mode = False  # test mode enabled
 
 # Helpers
-def saveCredentials(username,password):
-        with open("creds.json","w") as f:
-            json.dump({"username":username,"password":password},f)
+def saveCredentials(username, password):
+    with open("creds.json", "w") as f:
+        json.dump({"username": username, "password": password}, f)
+
 
 def deleteCredentials():
-    if(os.path.exists("creds.json")):
+    if os.path.exists("creds.json"):
         os.remove("creds.json")
 
+
 def loadSavedCredentials():
-    if(os.path.exists("creds.json")):
-        with open("creds.json","r") as f:
+    if os.path.exists("creds.json"):
+        with open("creds.json", "r") as f:
             data = json.load(f)
             return data
     else:
         return None
 
+
 # Welcome to Biblio
 def welcomeMessage():
-    print(Panel.fit("The all in one bookstore for all your reading needs.", title="Welcome to Biblio", border_style="red",subtitle_align="center"))
-    action = Prompt.ask("", choices=["Login", "Register"], default="Register")
+    print(
+        Panel.fit(
+            "The all in one bookstore for all your reading needs.",
+            title="Welcome to Biblio",
+            border_style="red",
+            subtitle_align="center",
+        )
+    )
+    action = Prompt.ask("", choices=["Login", "Register"], default="Login")
     return action
+
 
 # Register
 def register():
     c.clear()
-    print(Panel.fit("Create an account",title="Register", border_style="red"))
+    print(Panel.fit("Create an account", title="Register", border_style="red"))
     username = Prompt.ask("Username")
     email = Prompt.ask("Email")
     password = Prompt.ask("Password", password=True)
     confirm = Confirm.ask("Confirm Signup")
     if confirm:
         return api.register_user({"username": username, "email": email, "password": password})
-        
+
     else:
         exit(0)
+
 
 # Login
 def login():
     c.clear()
-    print(Panel.fit("Access your existing account.",title="Login", border_style="red"))
+    print(Panel.fit("Access your existing account.", title="Login", border_style="red"))
     saved = loadSavedCredentials()
     if saved is not None:
         print("Found Saved Credentials")
@@ -66,85 +80,103 @@ def login():
     password = Prompt.ask("Password", password=True)
     save = Confirm.ask("Save Credentials")
     if save:
-        saveCredentials(username,password)
+        saveCredentials(username, password)
     else:
         deleteCredentials()
     return api.authenticate({"username": username, "password": password})
 
+
 def admin():
     c.clear()
-    print(Panel.fit("Manage the products of biblio",title="Admin", border_style="red"))
+    print(Panel.fit("Manage the products of biblio", title="Admin", border_style="red"))
     action = Prompt.ask("", choices=["Add", "Delete", "Display", "Update", "Exit"], default="Add")
-    if(action == "Add"):
+    if action == "Add":
         success = createProduct()
         print("[green]Added Product Successfuly[/green]" if success else "[red]Failed to create[/red]")
-    elif(action == "Delete"):
-        success =  deleteProduct()
+        time.sleep(3)
+    elif action == "Delete":
+        success = deleteProduct()
         print("[green]Deleted Product Successfuly[/green]" if success else "[red]Failed to delete[/red]")
-    elif(action == "Display"):
+    elif action == "Display":
         success = displayProductData()
-    elif(action == "Update"):
+    elif action == "Update":
         success = updateProduct()
         print("[green]Updated Product Successfuly[/green]" if success else "[red]Failed to update[/red]")
     else:
         exit(0)
 
+
 # Home
 def home():
     c.clear()
-    print(Panel.fit("Welcome to Biblio",title="Home", border_style="red"))
-    action = Prompt.ask("", choices=["Search","Discover", "Admin","Exit"], default="Search")
-    if(action == "Search"):
+    print(Panel.fit("Welcome to Biblio", title="Home", border_style="red"))
+    action = Prompt.ask("", choices=["Search", "Discover", "Admin", "Exit"], default="Search")
+    if action == "Search":
         displayResults(search())
-    elif(action == "Discover"):
+    elif action == "Discover":
         displayResults(discover())
-    elif(action == "Admin"):
+    elif action == "Admin":
         admin()
     else:
         exit(0)
+
 
 def discover():
     return []
     c.clear()
     print(Panel.fit(title="Discover", border_style="red"))
-    results = api.discover() #TODO: implement 
+    results = api.discover()  # TODO: implement
     return results
+
 
 def search():
     c.clear()
-    print(Panel.fit("Selected a Category",title="Search", border_style="red"))
-    category = Prompt.ask("Enter Category") #TODO: change to prompts
+    print(Panel.fit("Selected a Category", title="Search", border_style="red"))
+    category = Prompt.ask("Enter Category")  # TODO: change to prompts
     results = api.get_products_from_category(category)
-    
+
     return results
+
 
 def createProduct():
     c.clear()
-    print(Panel.fit("Add a new product",title="Add Product", border_style="red"))
+    print(Panel.fit("Add a new product", title="Add Product", border_style="red"))
     name = Prompt.ask("Name")
     price = Prompt.ask("Price")
     qty = Prompt.ask("Quantity")
     date = Prompt.ask("Date Published")
     genre = Prompt.ask("Genre")
     cov_image = Prompt.ask("Cover Image")
-    return api.create_product({"name": name, "price": price, "qty": qty, "date": date, "genre": genre, "cov_image": cov_image})
+    return api.create_product(
+        {"name": name, "price": price, "qty": qty, "date": date, "genre": genre, "cov_image": cov_image}
+    )
+
 
 def deleteProduct():
     c.clear()
-    print(Panel.fit(title="Delete Product", border_style="red"))
+    print(Panel.fit("Delete Product", border_style="red"))
     id = Prompt.ask("ID")
     confirm = Confirm.ask("Confirm Delete")
     if confirm:
         return api.delete_product(id)
     return None
 
+
 def displayProductData(product_id: str = None):
     if product_id is None:
         product_id = Prompt.ask("Product ID")
     product = api.get_product(product_id)
-    #TODO: create display layout
-    displayRecord(product)
-    
+    # TODO: create display layout
+    # print(product)
+    if product is None:
+        displayErrorMessage()
+        time.sleep(5)
+        return False
+    else:
+        c.clear()
+        displayRecord(product["data"]["product_details"])
+
+
 def updateProduct(product_id: str = None):
     if product_id is None:
         product_id = Prompt.ask("Product ID")
@@ -155,7 +187,10 @@ def updateProduct(product_id: str = None):
     date = Prompt.ask("Date Published", default=product["date"])
     genre = Prompt.ask("Genre", default=product["genre"])
     cov_image = Prompt.ask("Cover Image", default=product["cov_image"])
-    return api.update_product(product_id, {"name": name, "price": price, "qty": qty, "date": date, "genre": genre, "cov_image": cov_image})
+    return api.update_product(
+        product_id, {"name": name, "price": price, "qty": qty, "date": date, "genre": genre, "cov_image": cov_image}
+    )
+
 
 def displayResults(results):
     if len(results) == 0 or results is None:
@@ -166,7 +201,6 @@ def displayResults(results):
         show_header=True,
         header_style="bold magenta",
         show_lines=True,
-
     )
     table.add_column("ID", style="dim bold", width=12)
     table.add_column("Name", style="dim bold", width=35)
@@ -176,10 +210,10 @@ def displayResults(results):
     table.add_column("Genre", justify="right")
     # table.add_column("Cover Image", justify="right")
     i = 0
-    for result in results['data']:
-        id_opts.append(str(result['id']))
+    for result in results["data"]:
+        id_opts.append(str(result["id"]))
         table.add_row(
-            str(result['id']),
+            str(result["id"]),
             result["name"],
             str(result["price"]),
             str(result["quantity"]),
@@ -191,57 +225,57 @@ def displayResults(results):
         i += 1
     c.print(table)
     action = Prompt.ask("Choose Product ID", choices=id_opts, default=id_opts[0])
-    for result in results['data']:
-        if result['id'] == int(action):
+    for result in results["data"]:
+        if result["id"] == int(action):
             displayRecord(result)
             break
 
-def displayRecord(record):
-        l = Layout(name="root")
-        metaL =  Layout(name="meta", ratio=1)
-        metaTable = Table(
-            title=record['name'],
 
-        )
-        metaTable.add_column("")
-        metaTable.add_column("")
-        metaTable.add_row("ID", str(record['id']))
-        metaTable.add_row("Name", record['name'])
-        metaTable.add_row("Price", str(record['price']))
-        metaTable.add_row("Quantity", str(record['quantity']))
-        metaTable.add_row("Date Published", str(parser.parse(record['date_published']).strftime("%Y-%m-%d")))
-        metaTable.add_row("Genre", record['genre'])
-        pictL =  Layout(name="image", ratio=1)
-        l.split_row(
-            metaL,
-            pictL
-        )
-        metaL.update(
-            metaTable
-        )
-        print(l)
-        action = Prompt.ask("Choose Action", choices=["Buy Now","back"], default="Buy Now")
-        if action == "Buy Now":
-            pass
-            # add buy code here
-        else:
-            return
-        
-        
+def displayRecord(record):
+    l = Layout(name="root")
+    metaL = Layout(name="meta", ratio=1)
+    metaTable = Table(
+        title=record["name"],
+    )
+    metaTable.add_column("")
+    metaTable.add_column("")
+    metaTable.add_row("ID", str(record["id"]))
+    metaTable.add_row("Name", record["name"])
+    metaTable.add_row("Price", str(record["price"]))
+    metaTable.add_row("Quantity", str(record["quantity"]))
+    metaTable.add_row("Date Published", str(parser.parse(record["date_published"]).strftime("%Y-%m-%d")))
+    metaTable.add_row("Genre", record["genre"])
+    pictL = Layout(name="image", ratio=1)
+    l.split_row(metaL, pictL)
+    metaL.update(metaTable)
+    print(l)
+    action = Prompt.ask("Choose Action", choices=["Buy Now", "back"], default="Buy Now")
+    if action == "Buy Now":
+        pass
+        # add buy code here
+    else:
+        return
 
 
 # main program starts
 if 1:
-        c.clear()
-        if not online:
-            print(Panel.fit("Please start server and try again.", title="Server Offline", border_style="red",subtitle_align="center"))
-            exit(1)
-        action = welcomeMessage()
-        if action == "Register":
-            register()
-        else:
-            login()
-        while True:
-            home()
+    c.clear()
+    if not online:
+        print(
+            Panel.fit(
+                "Please start server and try again.",
+                title="Server Offline",
+                border_style="red",
+                subtitle_align="center",
+            )
+        )
+        exit(1)
+    action = welcomeMessage()
+    if action == "Register":
+        register()
+    else:
+        login()
+    while True:
+        home()
 else:
-    pass #TODO: use this to test induvidual screens
+    pass  # TODO: use this to test individual screens
