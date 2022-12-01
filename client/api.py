@@ -71,8 +71,10 @@ class BiblioAPI:
 
     def get_product(self, product_id: str) -> dict:
         res = requests.get(f"{self.base}/products/{product_id}")
-        data = res.json()
-        return res.status_code == 200
+        if(res.status_code == 200):
+            data = res.json()
+            return data
+        return None
 
     def create_product(self, product_data: dict) -> bool:
         """
@@ -92,7 +94,7 @@ class BiblioAPI:
         -H 'accept: application/json' \
         -H 'Authorization: Bearer {self.token}' \
         -H 'Content-Type: application/json' \
-        -d '{product_data}'"
+        -d '{json.dumps(product_data)}'"
         ).read()
         a = eval(str(a))
         return a["status"] == "success"

@@ -111,11 +111,11 @@ def admin():
 def home():
     c.clear()
     print(Panel.fit("Welcome to Biblio", title="Home", border_style="red"))
-    action = Prompt.ask("", choices=["Search", "Discover", "Admin", "Exit"], default="Search")
+    action = Prompt.ask("", choices=["Search", "Admin", "Exit"], default="Search")
     if action == "Search":
         displayResults(search())
-    elif action == "Discover":
-        displayResults(discover())
+    # elif action == "Discover":
+    #     displayResults(discover())
     elif action == "Admin":
         admin()
     else:
@@ -148,11 +148,9 @@ def createProduct():
     name = Prompt.ask("Name")
     price = Prompt.ask("Price")
     qty = Prompt.ask("Quantity")
-    date = Prompt.ask("Date Published")
     genre = Prompt.ask("Genre")
-    cov_image = Prompt.ask("Cover Image")
     return api.create_product(
-        {"name": name, "price": price, "qty": qty, "date": date, "genre": genre, "cov_image": cov_image}
+        {"name": name, "price": price, "quantity": qty, "genre": genre,}
     )
 
 
@@ -162,7 +160,10 @@ def deleteProduct():
     id = Prompt.ask("ID")
     confirm = Confirm.ask("Confirm Delete")
     if confirm:
-        return api.delete_product(id)
+        status =  api.delete_product(id)
+        print("[green]Deleted Product[/green]" if status else "[red]Failed to delete[/red]")
+        time.sleep(3)
+        return status
     return None
 
 
@@ -173,7 +174,7 @@ def displayProductData(product_id: str = None):
     # TODO: create display layout
     # print(product)
     if product is None:
-        displayErrorMessage()
+        print("[red]Product Not Found[/red]")
         time.sleep(5)
         return False
     else:
@@ -185,20 +186,20 @@ def updateProduct(product_id: str = None):
     if product_id is None:
         product_id = Prompt.ask("Product ID")
     product = api.get_product(product_id)
-    name = Prompt.ask("Name", default=product["name"])
-    price = Prompt.ask("Price", default=product["price"])
-    qty = Prompt.ask("Quantity", default=product["qty"])
-    date = Prompt.ask("Date Published", default=product["date"])
-    genre = Prompt.ask("Genre", default=product["genre"])
-    cov_image = Prompt.ask("Cover Image", default=product["cov_image"])
+    name = Prompt.ask("Name", default=product['data']["product_details"]["name"])
+    price = Prompt.ask("Price", default=product['data']["product_details"]["price"])
+    qty = Prompt.ask("Quantity", default=product['data']["product_details"]["quantity"])
+    genre = Prompt.ask("Genre", default=product['data']["product_details"]["genre"])
     return api.update_product(
-        product_id, {"name": name, "price": price, "qty": qty, "date": date, "genre": genre, "cov_image": cov_image}
+        product_id, {"name": name, "price": price, "quantity": qty, "genre": genre,}
     )
 
 
 def displayResults(results):
-    if len(results) == 0 or results is None:
-        return
+    if results is None or len(results) == 0:
+        print("[red]No Results Found[/red]")
+        time.sleep(3)
+        return False
     id_opts = []
     table = Table(
         title=f"{results['data'][0]['genre'].upper()} Genre",
