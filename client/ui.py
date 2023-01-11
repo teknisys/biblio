@@ -16,8 +16,8 @@ c = Console()
 api = BiblioAPI()
 # Server Status Check
 online = api.status()
-# online  = True # use for testing
-test_mode = False  # test mode enabled
+online = True  # use for testing
+test_mode = True  # test mode enabled
 
 # Helpers
 def saveCredentials(username, password):
@@ -150,7 +150,12 @@ def createProduct():
     qty = Prompt.ask("Quantity")
     genre = Prompt.ask("Genre")
     return api.create_product(
-        {"name": name, "price": price, "quantity": qty, "genre": genre,}
+        {
+            "name": name,
+            "price": price,
+            "quantity": qty,
+            "genre": genre,
+        }
     )
 
 
@@ -160,7 +165,7 @@ def deleteProduct():
     id = Prompt.ask("ID")
     confirm = Confirm.ask("Confirm Delete")
     if confirm:
-        status =  api.delete_product(id)
+        status = api.delete_product(id)
         print("[green]Deleted Product[/green]" if status else "[red]Failed to delete[/red]")
         time.sleep(3)
         return status
@@ -186,12 +191,18 @@ def updateProduct(product_id: str = None):
     if product_id is None:
         product_id = Prompt.ask("Product ID")
     product = api.get_product(product_id)
-    name = Prompt.ask("Name", default=product['data']["product_details"]["name"])
-    price = Prompt.ask("Price", default=product['data']["product_details"]["price"])
-    qty = Prompt.ask("Quantity", default=product['data']["product_details"]["quantity"])
-    genre = Prompt.ask("Genre", default=product['data']["product_details"]["genre"])
+    name = Prompt.ask("Name", default=product["data"]["product_details"]["name"])
+    price = Prompt.ask("Price", default=product["data"]["product_details"]["price"])
+    qty = Prompt.ask("Quantity", default=product["data"]["product_details"]["quantity"])
+    genre = Prompt.ask("Genre", default=product["data"]["product_details"]["genre"])
     return api.update_product(
-        product_id, {"name": name, "price": price, "quantity": qty, "genre": genre,}
+        product_id,
+        {
+            "name": name,
+            "price": price,
+            "quantity": qty,
+            "genre": genre,
+        },
     )
 
 

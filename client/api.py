@@ -5,7 +5,7 @@ import os
 
 
 class BiblioAPI:
-    def __init__(self, url: str = "http://biblio_api:8000") -> None:
+    def __init__(self, url: str = "http://localhost:8000") -> None:
         self.base = url.removesuffix("/")
         self.auth_data = None
         self.token = ""
@@ -33,7 +33,7 @@ class BiblioAPI:
         t = str(t)
         t = eval(t)
         self.token = t["access_token"]
-        a = requests.get(f"http://localhost:8000/verification?token={self.token}")
+        a = requests.get(f"{self.base}/verification?token={self.token}")
         return a.status_code == 200
 
     def delete_product(self, product_id: str) -> bool:
@@ -71,7 +71,7 @@ class BiblioAPI:
 
     def get_product(self, product_id: str) -> dict:
         res = requests.get(f"{self.base}/products/{product_id}")
-        if(res.status_code == 200):
+        if res.status_code == 200:
             data = res.json()
             return data
         return None
