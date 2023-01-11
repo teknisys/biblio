@@ -1,6 +1,19 @@
 # BIBLIO SERVER
 
-[README WIP]
+# Docker (Compose) Setup
+
+Build Image
+```
+docker compose up --build -d
+```
+
+Login to UI
+```
+docker compose exec biblio_ui bash
+python ui.py
+```
+
+---
 
 # Installation
 

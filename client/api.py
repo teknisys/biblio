@@ -5,7 +5,7 @@ import os
 
 
 class BiblioAPI:
-    def __init__(self, url: str = "http://localhost:8000") -> None:
+    def __init__(self, url: str = "http://biblio_api:8000") -> None:
         self.base = url.removesuffix("/")
         self.auth_data = None
         self.token = ""

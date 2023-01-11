@@ -1,0 +1,20 @@
+version: "3.8"
+services:
+  biblio_api:
+    image: biblio_backend
+    build: ./server
+    container_name: biblio_backend
+    ports:
+        - "8000:8000"
+    volumes:
+        - ./server:/usr/src/app
+  biblio_ui:
+    image: biblio_ui
+    build: ./client
+    container_name: biblio_ui
+    depends_on:
+        -   biblio_api
+    volumes:
+        - ./client:/usr/src/app
+    stdin_open: true
+    tty: true

@@ -37,7 +37,7 @@ from fastapi.staticfiles import StaticFiles
 from PIL import Image
 
 from fastapi.templating import Jinja2Templates
-
+import autoPopulateDB
 from fastapi.responses import HTMLResponse
 
 from slowapi.errors import RateLimitExceeded
@@ -313,3 +313,5 @@ register_tortoise(
     generate_schemas=True,
     add_exception_handlers=True,
 )
+
+autoPopulateDB.populateDB()
