@@ -1,10 +1,11 @@
 import requests
 import json
 import os
+import pytest
 
 username = "badads"
-email = "ass7@gutkhamail.com"
-password = "Cbat1984"
+email = "test@test.com"
+password = "testing"
 token = ""
 
 
@@ -53,10 +54,25 @@ def specpro():
     )
 
 
-print(servercheck())
-print(register())
-print(verify())
-print(filter())
-print(proget())
-print(specpro())
-print(token)
+def test1():
+    assert servercheck() == True
+
+
+def test2():
+    assert register() == True
+
+
+def test3():
+    assert verify() == True
+
+
+def test4():
+    assert filter() == True
+
+
+def test4():
+    assert proget() == True
+
+
+def test4():
+    assert specpro() == True
