@@ -1,7 +1,7 @@
 from tortoise import models
 from tortoise import fields
 from tortoise.contrib.pydantic import pydantic_model_creator
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 class User(models.Model):
@@ -10,7 +10,7 @@ class User(models.Model):
     email = fields.CharField(max_length=200, null=False, unique=True)
     password = fields.CharField(max_length=100, null=False)
     is_verified = fields.BooleanField(default=False)
-    join_date = fields.DatetimeField(default=datetime.utcnow)
+    join_date = fields.DatetimeField(default=datetime.now(timezone.utc))
 
 
 class Business(models.Model):
@@ -24,7 +24,7 @@ class Product(models.Model):
     genre = fields.CharField(max_length=20, index=True)
     price = fields.DecimalField(max_digits=12, decimal_places=2)
     cover_image = fields.CharField(max_length=200, null=False, default="productDefault.jpg")
-    date_published = fields.DatetimeField(default=datetime.utcnow)
+    date_published = fields.DatetimeField(default=datetime.now(timezone.utc), null=True)
     business = fields.ForeignKeyField("models.Business", related_name="products")
     quantity = fields.IntField()
 

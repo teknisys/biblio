@@ -31,6 +31,7 @@ class BiblioAPI:
         ).read()
 
         t = str(t)
+        print("T", t)
         t = eval(t)
         self.token = t["access_token"]
         a = requests.get(f"{self.base}/verification?token={self.token}")
@@ -97,6 +98,7 @@ class BiblioAPI:
         -d '{json.dumps(product_data)}'"
         ).read()
         a = eval(str(a))
+        print("a", a)
         return a["status"] == "success"
 
     def get_products_from_category(self, category: str) -> list:

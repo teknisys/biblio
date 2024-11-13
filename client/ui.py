@@ -114,8 +114,6 @@ def home():
     action = Prompt.ask("", choices=["Search", "Admin", "Exit"], default="Search")
     if action == "Search":
         displayResults(search())
-    # elif action == "Discover":
-    #     displayResults(discover())
     elif action == "Admin":
         admin()
     else:
@@ -257,18 +255,19 @@ def displayRecord(record):
     metaTable.add_column("")
     metaTable.add_row("ID", str(record["id"]))
     metaTable.add_row("Name", record["name"])
-    metaTable.add_row("Price", str(record["price"]))
+    # metaTable.add_row("Price", str(record["price"]))
+    metaTable.add_row("Price", "INR {:.2f}".format(float(record["price"])))
     metaTable.add_row("Quantity", str(record["quantity"]))
     metaTable.add_row("Date Published", str(parser.parse(record["date_published"]).strftime("%Y-%m-%d")))
     metaTable.add_row("Genre", record["genre"])
-    pictL = Layout(name="image", ratio=1)
-    l.split_row(metaL, pictL)
+    # pictL = Layout(name="image", ratio=1)
+    l.split_column(metaL)
     metaL.update(metaTable)
     print(l)
     action = Prompt.ask("Choose Action", choices=["Buy Now", "back"], default="Buy Now")
     if action == "Buy Now":
-        pass
-        # add buy code here
+        print("[green]Purchased Product Successfully![/green]")
+        time.sleep(2)
     else:
         return
 
@@ -293,5 +292,4 @@ if 1:
         login()
     while True:
         home()
-else:
-    pass  # TODO: use this to test individual screens
+
