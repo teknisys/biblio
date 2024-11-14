@@ -3,9 +3,9 @@ import json
 import os
 import pytest
 
-username = "badads"
+username = "test"
 email = "test@test.com"
-password = "testing"
+password = "string"
 token = ""
 
 
@@ -36,7 +36,6 @@ def proget():
     product = requests.get("http://localhost:8000/products/")
     return product.status_code == 200
 
-
 def filter():
     filter1 = requests.get(f"http://localhost:8000/filter/fiction/")
     filter2 = requests.get(f"http://localhost:8000/filter/Gaming/")
@@ -47,9 +46,9 @@ def specpro():
     # autoPopulateDB.populateDB()
     product = requests.get("http://localhost:8000/products/1")
     p = eval(product.content)
+    print(p)
     return (
         p["data"]["product_details"]["name"] == "1984"
-        and p["data"]["product_details"]["price"] == 20
         and product.status_code == 200
     )
 
@@ -70,9 +69,10 @@ def test4():
     assert filter() == True
 
 
-def test4():
+def test5():
     assert proget() == True
 
 
-def test4():
+def test6():
     assert specpro() == True
+

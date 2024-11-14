@@ -134,7 +134,7 @@ def discover():
 def search():
     c.clear()
     print(Panel.fit("Selected a Category", title="Search", border_style="red"))
-    category = Prompt.ask("Enter Category")  # TODO: change to prompts
+    category = Prompt.ask("Enter Category") 
     results = api.get_products_from_category(category)
 
     return results
@@ -229,7 +229,7 @@ def displayResults(results):
         table.add_row(
             str(result["id"]),
             result["name"],
-            str(result["price"]),
+            "INR {:.2f}".format(float(result["price"])),
             str(result["quantity"]),
             # parse a datetime string
             parser.parse(result["date_published"]).strftime("%Y-%m-%d"),
@@ -266,8 +266,21 @@ def displayRecord(record):
     print(l)
     action = Prompt.ask("Choose Action", choices=["Buy Now", "back"], default="Buy Now")
     if action == "Buy Now":
-        print("[green]Purchased Product Successfully![/green]")
-        time.sleep(2)
+        a = Prompt.ask(f"Enter quantity to buy")
+        record["quantity"] = int(a)
+        print("[red]Total cost:[/red]", record["quantity"] * int(a))
+        confirm = Confirm.ask("Confirm Signup")
+        if confirm:
+            res = api.checkout([record])
+            if not res:
+                print("[red]Order quantity is greater than quantity in stock[/red]")
+                time.sleep(2)
+                displayRecord(record) 
+            else:
+                print("[green]Purchased Product Successfully![/green]")
+                time.sleep(2)
+        else:
+            displayRecord(record) 
     else:
         return
 

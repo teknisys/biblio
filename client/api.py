@@ -31,7 +31,6 @@ class BiblioAPI:
         ).read()
 
         t = str(t)
-        print("T", t)
         t = eval(t)
         self.token = t["access_token"]
         a = requests.get(f"{self.base}/verification?token={self.token}")
@@ -40,7 +39,7 @@ class BiblioAPI:
     def delete_product(self, product_id: str) -> bool:
         a = os.popen(
             f"curl -X 'DELETE' \
-        '{self.base}/products/1' \
+        '{self.base}/products/{product_id}' \
         -H 'accept: application/json' \
         -H 'Authorization: Bearer {self.token}'"
         ).read()
@@ -98,7 +97,8 @@ class BiblioAPI:
         -d '{json.dumps(product_data)}'"
         ).read()
         a = eval(str(a))
-        print("a", a)
+        if (a == {"detail": "Invalid username or password"}):
+            return False
         return a["status"] == "success"
 
     def get_products_from_category(self, category: str) -> list:
@@ -107,3 +107,17 @@ class BiblioAPI:
             return res.json()
         else:
             return None
+        
+    def checkout(self, product_data: dict):
+        a = os.popen(
+            f"curl -X 'POST' \
+        '{self.base}/checkout' \
+        -H 'accept: application/json' \
+        -H 'Authorization: Bearer {self.token}' \
+        -H 'Content-Type: application/json' \
+        -d '{json.dumps(product_data)}'"
+        ).read()
+        a = eval(str(a))
+        return a != {'detail': 'Order quantity is greater than quantity in stock'}
+            
+    

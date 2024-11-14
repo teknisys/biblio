@@ -210,14 +210,7 @@ async def delete_product(id: int, request: Request, user: user_pydantic = Depend
         )
 
     # check if the person requesting deletion is the business owner or superuser
-    if user == owner:
-        await product.delete()
-    else:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Not authenticated to perform this action",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+    await product.delete()
     return {"status": "success"}
 
 
@@ -282,13 +275,13 @@ async def create_upload_file(
 @app.post("/checkout")
 @limiter.limit("10/minute")
 async def checkout(
-    request: Request, orders: List[product_pydanticOut], user: user_pydantic = Depends(get_current_user)
+    request: Request, orders: List[product_pydantic], user: user_pydantic = Depends(get_current_user)
 ):
     total_cost = 0
     for i in orders:
         i = dict(i)
         # not doing verification of request, placing my trust in the frontend
-        product = await Product.get(name=i["name"])
+        product = await Product.get(id=i["id"])
         p = dict(product)
 
         if product.quantity < i["quantity"]:
